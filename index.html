@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexcom Device Auditor</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <main class="p-4 max-w-2xl mx-auto">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="font-bold mb-4">Scanner (Ruwe Modus)</h2>
+            <select id="scanTarget" class="w-full border p-2 rounded mb-4">
+                <option value="sn">Scan naar: SN / Barcode</option>
+                <option value="mac">Scan naar: MAC Adres</option>
+            </select>
+            <div id="reader" class="w-full bg-black"></div>
+        </div>
+
+        <form id="deviceForm" class="bg-white p-6 rounded-lg shadow">
+            <input type="text" id="sn" placeholder="SN / Barcode" class="w-full border p-2 mb-2 rounded">
+            <input type="text" id="mac" placeholder="MAC Adres" class="w-full border p-2 mb-2 rounded">
+            <button type="button" onclick="pushToDatabase()" class="w-full bg-blue-600 text-white p-3 rounded">Toevoegen</button>
+        </form>
+    </main>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyC3VS2-Zl723xGngcV9zZSmF4wQorcvl60", databaseURL: "https://flexcom-auditor-default-rtdb.europe-west1.firebasedatabase.app" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Extreem ruwe scan-configuratie
+        const html5QrCode = new Html5Qrcode("reader");
+        const config = { 
+            fps: 10, 
+            aspectRatio: 1.0,
+            disableFlip: false,
+            verbose: true // Geeft info in de console
+        };
+        
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            console.log("Scanner ziet:", decodedText); // CONTROLEER DIT IN DE CONSOLE!
+            const target = document.getElementById('scanTarget').value;
+            document.getElementById(target).value = decodedText;
+        }).catch(err => console.log("Scanner fout: " + err));
+
+        function pushToDatabase() {
+            db.ref('devices/').push({
+                sn: document.getElementById('sn').value,
+                mac: document.getElementById('mac').value,
+                timestamp: new Date().toLocaleString()
+            });
+        }
+    </script>
+</body>
+</html>
