@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexcom Device Auditor</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#004a99">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        .flexcom-blue { background-color: #004a99; }
+        .flexcom-text { color: #004a99; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <header class="flexcom-blue text-white p-4 shadow-lg">
+        <h1 class="text-xl font-bold">Flexcom Device Auditor</h1>
+    </header>
+
+    <main class="p-4 max-w-2xl mx-auto">
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="font-bold mb-4 flexcom-text">Scanner (Optimalisatie voor Yealink)</h2>
+            <select id="scanTarget" class="w-full border p-2 rounded mb-4">
+                <option value="sn">Scan naar: SN / Barcode</option>
+                <option value="mac">Scan naar: MAC Adres</option>
+            </select>
+            <div id="reader" class="w-full bg-black rounded overflow-hidden"></div>
+        </div>
+
+        <!-- Formulier blijft hetzelfde -->
+        <form id="deviceForm" class="bg-white p-6 rounded-lg shadow">
+            <input type="text" id="omschrijving" placeholder="Omschrijving" class="w-full border p-2 mb-2 rounded" required>
+            <input type="text" id="sn" placeholder="SN / Barcode" class="w-full border p-2 mb-2 rounded">
+            <input type="text" id="mac" placeholder="MAC Adres" class="w-full border p-2 mb-2 rounded">
+            <button type="button" onclick="pushToDatabase()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">+ Toevoegen</button>
+        </form>
+
+        <div class="mt-6 bg-white p-4 rounded-lg shadow">
+            <h2 class="font-bold mb-2 flexcom-text">Live Inventaris</h2>
+            <div id="batchList" class="text-sm"></div>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3VS2-Zl723xGngcV9zZSmF4wQorcvl60",
+            databaseURL: "https://flexcom-auditor-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Scanner configuratie met focus op Yealink barcodes
+        const config = { 
+            fps: 15, 
+            qrbox: {width: 250, height: 100},
+            formatsToSupport: [ 
+                Html5QrcodeSupportedFormats.CODE_128, 
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.CODE_39 
+            ] 
+        };
+
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            // Verwijder alleen onnodige labels, behoud letters en cijfers
+            const cleanData = decodedText.replace(/(MAC|SN|S\/N|Barcode):/gi, '').trim();
+            const target = document.getElementById('scanTarget').value;
+            document.getElementById(target).value = cleanData;
+        }).catch(err => console.log("Scanner fout: " + err));
+
+        // ... (rest van de functies pushToDatabase/renderList blijven gelijk)
+    </script>
+</body>
+</html>
