@@ -1,0 +1,30 @@
+{
+  "name": "Flexcom Auditor",
+  "short_name": "Auditor",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#004a99",
+  "theme_color": "#004a99",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063186.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063186.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+### Stap 2: Update je `index.html`
+Ik heb de `<head>` van je huidige `index.html` aangepast. Voeg de onderstaande regels toe aan het `<head>` gedeelte van je `index.html`:
+
+```html
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Flexcom Auditor">
